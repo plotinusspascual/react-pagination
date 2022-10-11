@@ -1,23 +1,42 @@
 import './App.css';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import ReactPaginate from 'react-paginate';
-import data from './data.json';
+// import data from './data.json';
 import { createRoot } from 'react-dom/client';
+
+let API = "https://getpantry.cloud/apiv1/pantry/c59268ab-8c40-409b-bac0-163ce113a086/basket/newBasket25";
+
+async function FetchPosts(){
+  try{
+    const response = await axios.get(API)
+    return response.data;
+  } catch(error){}
+}
 
 function Paginate({ itemsPerPage }){
   const [currentItems, setCurrentItems] = useState(null);
   const [pageCount, setPageCount] = useState(0);
   const [itemOffset, setItemOffset] = useState(0);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
+    FetchPosts().then(res => {
+      setUsers(res.data)
+      console.log(res.data)
+    })
+  },[])
+
+  console.log(users)
+  useEffect(() => {
     const endOffset = itemOffset + itemsPerPage;
-    setCurrentItems(data.slice(itemOffset, endOffset));
-    setPageCount(Math.ceil(data.length / itemsPerPage));
-  }, [itemOffset, itemsPerPage]);
+    setCurrentItems(users.slice(itemOffset, endOffset));
+    setPageCount(Math.ceil(users.length / itemsPerPage));
+  }, [itemOffset, itemsPerPage, users]);
 
 
   const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % data.length;
+    const newOffset = (event.selected * itemsPerPage) % users.length;
     setItemOffset(newOffset);
   };
 
@@ -48,6 +67,8 @@ function Paginate({ itemsPerPage }){
 } 
 function App({currentItems}) {
   console.log(currentItems)
+
+
   return(
     <div className = "items">
       <table>
